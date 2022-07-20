@@ -21,7 +21,7 @@ if (isInsideDocker()) {
 }
 
 //let response = await exec('git ls-remote --tags origin', {output: OutputMode.Capture});
-let response = await exec("command -v mkcert2", {
+let response = await exec("command -v mkcert", {
     output: OutputMode.Capture,
 });
 if (response.status.code !== 0) {
