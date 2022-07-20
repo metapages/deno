@@ -1,4 +1,5 @@
 /**
+ * Reference: https://blog.filippo.io/mkcert-valid-https-certificates-for-localhost/
  * Local browser development must be over https
  * That requires generating a self-signed certificate
  *
