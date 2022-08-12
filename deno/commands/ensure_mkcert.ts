@@ -27,7 +27,6 @@ const opts = getArgsFromEnvAndCli({
     CERTS_DIR: ".certs",
   });
 
-console.log('CERTS_DIR', opts.CERTS_DIR);
 if (opts.CI === "true") {
     console.log("CI=true ∴ skipping mkcert");
     Deno.exit(0);
