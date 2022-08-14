@@ -65,7 +65,7 @@ if (!existsSync(join(opts.CERTS_DIR, `${opts.APP_FQDN}-key.pem`))) {
 const etchosts = await Deno.readTextFile("/etc/hosts");
 if (!etchosts.includes(opts.APP_FQDN)) {
     console.log(`💥 %c/etc/hosts%c does not include %c${opts.APP_FQDN}`, "font-weight: bold", "", "font-weight: bold");
-    console.log(`💥 Add below to /etc/hosts with this command: %csudo vi /etc/hosts%c 💥`, "font-weight: bold");
+    console.log(`💥 Add below to /etc/hosts with this command: %csudo vi /etc/hosts 💥`, "font-weight: bold");
     console.log("");
     console.log(`%c127.0.0.1       ${opts.APP_FQDN}`, "font-weight: bold");
     console.log("");
