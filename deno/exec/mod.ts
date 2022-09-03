@@ -14,11 +14,7 @@ function splitCommand(command: string): string[] {
     if (match != null) {
       // Index 1 in the array is the captured group if it exists Index 0 is the matched text, which we use if no captured
       // group exists
-      splits.push(
-        match[1]
-          ? match[1]
-          : match[0]
-      );
+      splits.push(match[1] ? match[1] : match[0]);
     }
   } while (match != null);
 
@@ -54,18 +50,22 @@ interface IOptions {
 /**
  * Main function to run CLI commands
  */
-export const exec = async (command: string, options: IOptions = {
-  output: OutputMode.Tee,
-  verbose: false,
-  cwd: Deno.cwd(),
-  printCommand: true,
-  continueOnError: false,
-}): Promise<IExecResponse> => {
-  let splits = splitCommand(command);
+export const exec = async (
+  command: string,
+  options: IOptions = {
+    output: OutputMode.Tee,
+    verbose: false,
+    cwd: Deno.cwd(),
+    printCommand: true,
+    continueOnError: false,
+  }
+): Promise<IExecResponse> => {
+  const splits = splitCommand(command);
 
   const cwd = options.cwd || Deno.cwd();
 
-  const printCommand = options.printCommand === undefined ? true : options.printCommand;
+  const printCommand =
+    options.printCommand === undefined ? true : options.printCommand;
 
   let uuid = "";
   if (options.verbose) {
@@ -74,17 +74,29 @@ export const exec = async (command: string, options: IOptions = {
     console.log(`Exec Context: ${uuid}`);
     console.log(`    Exec Options: `, options);
     console.log(`    Exec Command: ${command}`);
+    console.log(`    Exec Env: ${options.env}`);
     console.log(`    Exec Command Splits:  [${splits}]`);
   }
   if (printCommand) {
     // get path minus home
-    console.log(`🚪 <${cwd.replace(Deno.env.get('WORKSPACE') as string, '')}/> ${Colors.bold(command)} 🚪`);
+    console.log(
+      `🚪 <${cwd.replace(
+        Deno.env.get("WORKSPACE") as string,
+        ""
+      )}/> ${Colors.bold(command)} 🚪`
+    );
   }
 
   if (!existsSync(cwd)) {
     throw `command: '${command} failed error: "${cwd} does not exist"`;
   }
-  let p = Deno.run({ cmd: splits, stdout: "piped", stderr: "inherit", cwd: cwd, env:options.env});
+  const p = Deno.run({
+    cmd: splits,
+    stdout: "piped",
+    stderr: "inherit",
+    cwd: cwd,
+    env: options.env,
+  });
 
   let response = "";
   let decoder = new TextDecoder();
@@ -97,12 +109,18 @@ export const exec = async (command: string, options: IOptions = {
         if (!result) {
           break;
         }
-        if (options.output == OutputMode.Capture || options.output == OutputMode.Tee) {
+        if (
+          options.output == OutputMode.Capture ||
+          options.output == OutputMode.Tee
+        ) {
           if (result) {
             response = response + decoder.decode(buff);
           }
         }
-        if (options.output == OutputMode.StdOut || options.output == OutputMode.Tee) {
+        if (
+          options.output == OutputMode.StdOut ||
+          options.output == OutputMode.Tee
+        ) {
           await Deno.stdout.write(buff);
         }
       } catch (ex) {
@@ -121,7 +139,7 @@ export const exec = async (command: string, options: IOptions = {
   let result = {
     status: {
       code: status.code,
-      success: status.success
+      success: status.success,
     },
     output: response.trim(),
     // stderr: decoder.decode(stdoutBuff),,,,
@@ -137,11 +155,14 @@ export const exec = async (command: string, options: IOptions = {
   return result;
 };
 
-export const execSequence = async (commands: string[], options: IOptions = {
-  output: OutputMode.StdOut,
-  continueOnError: false,
-  verbose: false
-}): Promise<IExecResponse[]> => {
+export const execSequence = async (
+  commands: string[],
+  options: IOptions = {
+    output: OutputMode.StdOut,
+    continueOnError: false,
+    verbose: false,
+  }
+): Promise<IExecResponse[]> => {
   let results: IExecResponse[] = [];
 
   for (let i = 0; i < commands.length; i++) {

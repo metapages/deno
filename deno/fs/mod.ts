@@ -5,6 +5,34 @@ import {
 } from "https://deno.land/std@0.130.0/fs/mod.ts";
 
 /**
+ * Return the first file found with the given name, in the current directory,
+ * and continuing searching into the parent down to the root.
+ * @param prefix
+ */
+ export const getNearestFile = (fileName : string, root? : string | undefined): string | undefined => {
+  let current = root
+    ? root
+    : Deno.cwd();
+  let found: string | undefined = undefined;
+  while (!found) {
+    for (const dirEntry of Deno.readDirSync(current)) {
+      if (dirEntry.name === fileName) {
+        found = join(current, dirEntry.name);
+        break;
+      }
+    }
+    // not found
+    const parsedPath = parse(current);
+    // at the root
+    if (parsedPath.dir === current) {
+      return;
+    }
+    current = parsedPath.dir;
+  }
+  return found;
+};
+
+/**
  * Return the first file found with the given prefix, in the current directory,
  * and continuing searching into the parent down to the root.
  * @param prefix

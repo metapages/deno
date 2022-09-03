@@ -1,64 +1,95 @@
-import { exec, OutputMode } from "../exec/mod.ts";
+import {
+  exec as Exec,
+  OutputMode,
+} from "../exec/mod.ts";
+// } from "https://deno.land/x/exec@0.0.5/mod.ts";
 
-export const ROOT: string = Deno.env.get('ROOT') || '/repo';
+export const ROOT: string = Deno.env.get("ROOT") || "/repo";
 export const DEPLOYMENTS_ROOT = `${ROOT}/cloud`;
 
 export type Provider = string;
 
 export const getDeployments = (): string[] => {
-    return getDirectoriesSync(DEPLOYMENTS_ROOT).filter(d => !d.startsWith('.'));
-}
+  return getDirectoriesSync(DEPLOYMENTS_ROOT).filter((d) => !d.startsWith("."));
+};
 
 export const getDirectoriesSync = (root: string): string[] => {
-    const directories: string[] = [];
-    for (const dirEntry of Deno.readDirSync(root)) {
-        if (dirEntry.isDirectory && !dirEntry.name.startsWith('.')) {
-            directories.push(dirEntry.name);
-        }
+  const directories: string[] = [];
+  for (const dirEntry of Deno.readDirSync(root)) {
+    if (dirEntry.isDirectory && !dirEntry.name.startsWith(".")) {
+      directories.push(dirEntry.name);
     }
-    return directories;
-}
+  }
+  return directories;
+};
 
 export const getFilesSync = (root: string): string[] => {
-    const files: string[] = [];
-    for (const dirEntry of Deno.readDirSync(root)) {
-        if (!dirEntry.name.startsWith('.')) {
-            files.push(dirEntry.name);
-        }
+  const files: string[] = [];
+  for (const dirEntry of Deno.readDirSync(root)) {
+    if (!dirEntry.name.startsWith(".")) {
+      files.push(dirEntry.name);
     }
-    return files;
-}
-
-/* Just returns the directories in the APP_PROVIDER_ROOT (not starting with ".") */
-export const getProviders = (): Provider[] => {
-    const directories: Provider[] = [];
-    for (const dirEntry of Deno.readDirSync(APP_PROVIDER_ROOT)) {
-        if (dirEntry.isDirectory && !dirEntry.name.startsWith('.')) {
-            directories.push(dirEntry.name);
-        }
-    }
-    return directories;
-}
+  }
+  return files;
+};
 
 export const getRepositoryName: () => Promise<string> = async () => {
+  // Is this running in Github Actions? Then it tell us the repository name, for example, octocat/Hello-World.
+  // https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables
+  if (
+    Deno.env.get("GITHUB_ACTIONS") === "true" &&
+    Deno.env.get("GITHUB_REPOSITORY") &&
+    Deno.env.get("GITHUB_REPOSITORY") !== ""
+  ) {
+    return Deno.env.get("GITHUB_REPOSITORY") as string;
+  }
 
-    // // If this is already supplied, use it
-    // if (Deno.env.get('DOCKER_IMAGE_PREFIX') && Deno.env.get('DOCKER_IMAGE_PREFIX') !== '') {
-    //     const dockerImagePrefix = Deno.env.get('DOCKER_IMAGE_PREFIX') as string;
-    //     return dockerImagePrefix.substr(0, dockerImagePrefix.length - 1);
-    // }
+  const output = await exec("git config --get remote.origin.url");
+  // output = e.g. git@github.com:myname/myrepo.git
+  return output.split(":")[1].replace(".git", "");
+};
 
-    // Is this running in Github Actions? Then it tell us the repository name, for example, octocat/Hello-World.
-    // https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables
-    if (Deno.env.get('GITHUB_ACTIONS') === 'true' && Deno.env.get('GITHUB_REPOSITORY') && Deno.env.get('GITHUB_REPOSITORY') !== '') {
-        return Deno.env.get('GITHUB_REPOSITORY') as string;
-    }
+/**
+ * Wrapper around exec so these can be done on a single line in
+ * most cases.
+ * Env vars are always inherited from the current process
+ * since it might call other just commands.
+ *
+ * @module
+ */
+export const exec: (
+  command: string,
+  env?: { [key: string]: string }
+) => Promise<string> = async (command, env) => {
+  exec;
+  const response = await Exec(command, {
+    output: OutputMode.StdOut,
+    // Allow env overrides
+    env: env ?? {},
+  });
+  if (response.status.code !== 0) {
+    console.log(`response.status.code=${response.status.code}`);
+    console.log(response);
+    throw new Error(`Command failed: ${command}`);
+  }
+  return response.output;
+};
 
-    const result = await exec('git config --get remote.origin.url', { output: OutputMode.Capture, continueOnError: false, printCommand: false, env: Deno.env.toObject() });
-    if (!result.status.success) {
-        throw result;
-    }
-
-    // results.output = e.g. git@github.com:myname/myrepo.git
-    return result.output.split(':')[1].replace('.git', '') ;
-}
+export const execCapture: (
+  command: string,
+  env?: { [key: string]: string }
+) => Promise<string> = async (command, env) => {
+  exec;
+  const response = await Exec(command, {
+    output: OutputMode.Capture,
+    // Allow env overrides
+    env: { ...Deno.env.toObject(), ...env ?? {}},
+    // verbose: true,
+  });
+  if (response.status.code !== 0) {
+    console.log(`response.status.code=${response.status.code}`);
+    console.log(response);
+    throw new Error(`Command failed: ${command}`);
+  }
+  return response.output;
+};
