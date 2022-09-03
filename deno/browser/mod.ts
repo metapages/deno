@@ -127,7 +127,6 @@ export const buildWithViteInternal: (args?: BuildWithViteOptions) => Promise<voi
     }
   }
   const env = { ...Deno.env.toObject(), ...args};
-  console.log('env', env);
   await exec("./node_modules/vite/bin/vite.js build --mode=production", env);
 };
 /**
@@ -137,7 +136,6 @@ export const buildIndexForVersions: (args?: {
   OUTDIR?: string;
 }) => Promise<void> = async (args) => {
   const { OUTDIR = Deno.env.get("OUTDIR") ?? "dist" } = args ?? {};
-  console.log('buildIndexForVersions OUTDIR', OUTDIR);
 
   await ensureDir(`${OUTDIR}/v`);
   let indexHtml =
@@ -147,7 +145,6 @@ export const buildIndexForVersions: (args?: {
     if (dirEntry.isDirectory) {
       indexHtml += `<li><a href="${dirEntry.name}/">${dirEntry.name}</a></li>`;
     }
-    console.log(dirEntry);
   }
   indexHtml += `</ul></body></html>`;
 

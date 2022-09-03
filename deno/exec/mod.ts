@@ -5,18 +5,19 @@ import * as Colors from "https://deno.land/std@0.83.0/fmt/colors.ts";
 export * from "./run.ts";
 
 function splitCommand(command: string): string[] {
-  var myRegexp = /[^\s"]+|"([^"]*)"/gi;
-  var splits = [];
+  const myRegexp = /[^\s"]+|"([^"]*)"/gi;
+  const splits = [];
 
+  let match;
   do {
     //Each call to exec returns the next regex match as an array
-    var match = myRegexp.exec(command);
+    match = myRegexp.exec(command);
     if (match != null) {
       // Index 1 in the array is the captured group if it exists Index 0 is the matched text, which we use if no captured
       // group exists
       splits.push(match[1] ? match[1] : match[0]);
     }
-  } while (match != null);
+  } while (match !== null);
 
   return splits;
 }
@@ -99,13 +100,13 @@ export const exec = async (
   });
 
   let response = "";
-  let decoder = new TextDecoder();
+  const decoder = new TextDecoder();
 
   if (p && options.output != OutputMode.None) {
     const buff = new Uint8Array(1);
     while (true) {
       try {
-        let result = await p.stdout.read(buff);
+        const result = await p.stdout.read(buff);
         if (!result) {
           break;
         }
@@ -130,13 +131,13 @@ export const exec = async (
     }
   }
 
-  let status = await p.status();
+  const status = await p.status();
   // let stdoutBuff = await p.stderrOutput();   let stdout = await p.stdoutOutput();
   // console.log(Colors.red(decoder.decode(stdout)))   if (stdoutBuff) {
   // console.error(Colors.red(decoder.decode(stdoutBuff)))   }   p.stdout?.close();
   p.close();
 
-  let result = {
+  const result = {
     status: {
       code: status.code,
       success: status.success,
@@ -163,10 +164,10 @@ export const execSequence = async (
     verbose: false,
   }
 ): Promise<IExecResponse[]> => {
-  let results: IExecResponse[] = [];
+  const results: IExecResponse[] = [];
 
   for (let i = 0; i < commands.length; i++) {
-    let result = await exec(commands[i], options);
+    const result = await exec(commands[i], options);
     results.push(result);
     if (options.continueOnError == false && result.status.code != 0) {
       break;

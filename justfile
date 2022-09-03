@@ -8,7 +8,7 @@ export DOCKER_IMAGE_PREFIX         := "ghcr.io/metapages/"
 export DOCKER_TAG                  := `if [ "${GITHUB_ACTIONS}" = "true" ]; then echo "${GITHUB_SHA}"; else echo "$(git rev-parse --short=8 HEAD)"; fi`
 export DOCKER_IMAGE_NAME           := `basename $(pwd)`
 # Source of deno scripts. When developing we need to switch this
-export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.1")
+export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https://deno.land/x/metapages@v0.0.8")
 # minimal formatting, bold is very useful
 bold                               := '\033[1m'
 normal                             := '\033[0m'
