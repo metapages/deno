@@ -39,10 +39,14 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
   // github pages serves from <domain.com>/<package/<site>
   // so the build needs to know that it is not served from
   // the root of the domain
+  // Except if there is a CNAME file, then it is served from the root
   const packageJson = await getPackageJson();
-  // @metapages/metaframe-editor => metaframe-editor
-  const tokens = packageJson.name.split("/");
-  const BASE = tokens[tokens.length - 1];
+  let BASE = "";
+  if (!existsSync('CNAME')) {
+    // @metapages/metaframe-editor => metaframe-editor
+    const tokens = packageJson.name.split("/");
+    BASE = tokens[tokens.length - 1];
+  }
   if (VERSIONING) {
     await buildWithVite({ BASE:join(BASE, `v${packageJson.version}`), OUTDIR:join(OUTDIR,`v${packageJson.version}`) });
   }
