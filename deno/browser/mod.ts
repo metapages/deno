@@ -36,17 +36,21 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
     `git rebase --strategy recursive --strategy-option theirs ${CURRENT_BRANCH}`
   );
 
+  const isServingGithubCustomDomain = existsSync('public/CNAME');
+  console.log('Found CNAME so serving custom domain:', isServingGithubCustomDomain);
+
   // github pages serves from <domain.com>/<package/<site>
   // so the build needs to know that it is not served from
   // the root of the domain
   // Except if there is a CNAME file, then it is served from the root
   const packageJson = await getPackageJson();
   let BASE = "";
-  if (!existsSync('CNAME') || !existsSync('public/CNAME')) {
+  if (!isServingGithubCustomDomain) {
     // @metapages/metaframe-editor => metaframe-editor
     const tokens = packageJson.name.split("/");
     BASE = tokens[tokens.length - 1];
   }
+
   if (VERSIONING) {
     await buildWithVite({ BASE:join(BASE, `v${packageJson.version}`), OUTDIR:join(OUTDIR,`v${packageJson.version}`) });
   }
@@ -59,10 +63,6 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
   }
 
   await exec(`git add --all --force ${OUTDIR}`);
-
-  if (existsSync('CNAME')) {
-    await exec(`git add --all --force CNAME`);
-  }
 
   const unCommittedFiles = await uncommittedFiles();
   if (unCommittedFiles.length > 0) {
