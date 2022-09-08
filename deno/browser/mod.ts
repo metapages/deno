@@ -42,7 +42,7 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
   // Except if there is a CNAME file, then it is served from the root
   const packageJson = await getPackageJson();
   let BASE = "";
-  if (!existsSync('CNAME')) {
+  if (!existsSync('CNAME') || !existsSync('public/CNAME')) {
     // @metapages/metaframe-editor => metaframe-editor
     const tokens = packageJson.name.split("/");
     BASE = tokens[tokens.length - 1];
