@@ -9,6 +9,7 @@ import {
 import { getPackageJson } from "../npm/mod.ts";
 import { exec, execCapture } from "../commands/mod.ts";
 import { getGitRepositoryRoot, getGithubPackagePage, uncommittedFiles, failIfGitUncommittedFiles } from "../git/mod.ts";
+import { existsSync } from 'https://deno.land/std@0.130.0/fs/mod.ts';
 
 /**
  * Uses vite to build the web app into a <root/docs> directory
@@ -54,6 +55,10 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
   }
 
   await exec(`git add --all --force ${OUTDIR}`);
+
+  if (existsSync('CNAME')) {
+    await exec(`git add --all --force CNAME`);
+  }
 
   const unCommittedFiles = await uncommittedFiles();
   if (unCommittedFiles.length > 0) {
