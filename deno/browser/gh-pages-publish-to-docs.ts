@@ -7,9 +7,12 @@
 import { publishGithubPages } from "./mod.ts";
 import { getArgsFromEnvAndCli } from "../env/args_or_env.ts";
 
-const opts = getArgsFromEnvAndCli({
+const { VERSIONING, BASE } = getArgsFromEnvAndCli({
+  // Keep previous versions, create a versioned version of this page (at BASE/v<semver>)
   VERSIONING: false,
+  // github pages serves from "https://<github org or username>.github.io>/<package>"
+  // for for github pages BASE must be <package>
+  BASE: false,
 });
-const { VERSIONING } = opts;
 
-await publishGithubPages({ VERSIONING });
+await publishGithubPages({ VERSIONING, BASE });

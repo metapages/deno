@@ -1,5 +1,5 @@
 // utilities for building and publishing a website to github pages
-import * as Colors from 'https://deno.land/std@0.153.0/fmt/colors.ts ';
+import * as Colors from "https://deno.land/std@0.153.0/fmt/colors.ts ";
 import { join } from "https://deno.land/std@0.153.0/path/mod.ts";
 import {
   ensureDir,
@@ -8,16 +8,22 @@ import {
 } from "https://deno.land/std@0.153.0/fs/mod.ts";
 import { getPackageJson } from "../npm/mod.ts";
 import { exec, execCapture } from "../commands/mod.ts";
-import { getGitRepositoryRoot, getGithubPackagePage, uncommittedFiles, failIfGitUncommittedFiles } from "../git/mod.ts";
-import { existsSync } from 'https://deno.land/std@0.130.0/fs/mod.ts';
+import {
+  getGitRepositoryRoot,
+  getGithubPackagePage,
+  uncommittedFiles,
+  failIfGitUncommittedFiles,
+} from "../git/mod.ts";
 
 /**
  * Uses vite to build the web app into a <root/docs> directory
  * for github pages
  * https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site
  */
-export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = async ({VERSIONING}) => {
-
+export const publishGithubPages: (args: {
+  VERSIONING?: string;
+  BASE?: string;
+}) => Promise<void> = async ({ VERSIONING, BASE = "" }) => {
   await failIfGitUncommittedFiles();
 
   const ROOT = await getGitRepositoryRoot();
@@ -36,30 +42,20 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
     `git rebase --strategy recursive --strategy-option theirs ${CURRENT_BRANCH}`
   );
 
-  const isServingGithubCustomDomain = existsSync('public/CNAME');
-  console.log('Found CNAME so serving custom domain:', isServingGithubCustomDomain);
-
-  // github pages serves from <domain.com>/<package/<site>
-  // so the build needs to know that it is not served from
-  // the root of the domain
-  // Except if there is a CNAME file, then it is served from the root
   const packageJson = await getPackageJson();
-  let BASE = "";
-  if (!isServingGithubCustomDomain) {
-    // @metapages/metaframe-editor => metaframe-editor
-    const tokens = packageJson.name.split("/");
-    BASE = tokens[tokens.length - 1];
-  }
 
   if (VERSIONING) {
-    await buildWithVite({ BASE:join(BASE, `v${packageJson.version}`), OUTDIR:join(OUTDIR,`v${packageJson.version}`) });
+    await buildWithVite({
+      BASE: join(BASE, `v${packageJson.version}`),
+      OUTDIR: join(OUTDIR, `v${packageJson.version}`),
+    });
   }
   await buildWithVite({ BASE, OUTDIR });
 
   // If we are NOT a previous version (ie we are the root main app)
   // then generate the index.html file for the versions dir
   if (VERSIONING) {
-    await buildIndexForVersions({OUTDIR});
+    await buildIndexForVersions({ OUTDIR });
   }
 
   await exec(`git add --all --force ${OUTDIR}`);
@@ -76,7 +72,9 @@ export const publishGithubPages: (args:{VERSIONING?:string}) => Promise<void> = 
 
   const githubProjectUrl = await getGithubPackagePage();
 
-  console.log(`👉 Github configuration (once): 🔗 ${githubProjectUrl}/settings/pages`);
+  console.log(
+    `👉 Github configuration (once): 🔗 ${githubProjectUrl}/settings/pages`
+  );
   console.log(`  - ${Colors.green("Source")}`);
   console.log(`    - ${Colors.green("Branch")}: gh-pages 📁 /docs`);
 };
@@ -97,30 +95,38 @@ type BuildWithViteOptions = {
  * The important env vars for builds with vite.config.ts are: BASE,OUTDIR
  * @module
  */
-export const buildWithVite: (args?: BuildWithViteOptions) => Promise<void> = async (args) => {
-
+export const buildWithVite: (
+  args?: BuildWithViteOptions
+) => Promise<void> = async (args) => {
   // github pages serves from <domain.com>/<package/<site>
   // so the build needs to know that it is not served from
   // the root of the domain
   const packageJson = await getPackageJson();
 
-  const { OUTDIR = Deno.env.get("OUTDIR") ?? "dist", BASE = Deno.env.get("BASE") ?? ""} = args || {};
+  const {
+    OUTDIR = Deno.env.get("OUTDIR") ?? "dist",
+    BASE = Deno.env.get("BASE") ?? "",
+  } = args || {};
   const VERSIONING = !!(args?.VERSIONING === "true");
   if (VERSIONING) {
-    await buildWithViteInternal({ BASE:join(BASE, `v${packageJson.version}`), OUTDIR:join(OUTDIR,`v${packageJson.version}`) });
+    await buildWithViteInternal({
+      BASE: join(BASE, `v${packageJson.version}`),
+      OUTDIR: join(OUTDIR, `v${packageJson.version}`),
+    });
   }
   await buildWithViteInternal({ BASE, OUTDIR });
 
   // If we are NOT a previous version (ie we are the root main app)
   // then generate the index.html file for the versions dir
   if (VERSIONING) {
-    await buildIndexForVersions({OUTDIR});
+    await buildIndexForVersions({ OUTDIR });
   }
 };
 
-
-export const buildWithViteInternal: (args?: BuildWithViteOptions) => Promise<void> = async (args) => {
-  const OUTDIR = args?.OUTDIR ?? (Deno.env.get("OUTDIR") ?? "dist");
+export const buildWithViteInternal: (
+  args?: BuildWithViteOptions
+) => Promise<void> = async (args) => {
+  const OUTDIR = args?.OUTDIR ?? Deno.env.get("OUTDIR") ?? "dist";
   ensureDirSync(OUTDIR);
 
   // Make sure the directory is empty EXCEPT for possible existing versions
@@ -135,7 +141,7 @@ export const buildWithViteInternal: (args?: BuildWithViteOptions) => Promise<voi
       await Deno.remove(file.path);
     }
   }
-  const env = { ...Deno.env.toObject(), ...args};
+  const env = { ...Deno.env.toObject(), ...args };
   await exec("./node_modules/vite/bin/vite.js build --mode=production", env);
 };
 /**
