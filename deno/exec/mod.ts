@@ -66,7 +66,7 @@ export const exec = async (
   const cwd = options.cwd || Deno.cwd();
 
   const printCommand =
-    options.printCommand === undefined ? true : options.printCommand;
+    options.printCommand === undefined ? false : options.printCommand;
 
   let uuid = "";
   if (options.verbose) {

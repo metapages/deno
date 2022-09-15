@@ -30,5 +30,5 @@ if (Deno.env.get('GITHUB_ACTIONS') === 'true') {
     //            <registry>/<owner>/<repo-name>:<sha>
     console.log(`${words[0]}/${words[1]}-`);
 } else {
-    console.log(`${repoName.endsWith('/') ? repoName.substr(0, repoName.length - 1) : repoName}/`);
+    console.log(`${repoName.endsWith('/') ? repoName.substring(0, repoName.length - 1) : repoName}/`);
 }
