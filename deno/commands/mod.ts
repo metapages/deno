@@ -2,7 +2,6 @@ import {
   exec as Exec,
   OutputMode,
 } from "../exec/mod.ts";
-// } from "https://deno.land/x/exec@0.0.5/mod.ts";
 
 export const ROOT: string = Deno.env.get("ROOT") || "/repo";
 export const DEPLOYMENTS_ROOT = `${ROOT}/cloud`;
@@ -44,7 +43,7 @@ export const getRepositoryName: () => Promise<string> = async () => {
     return Deno.env.get("GITHUB_REPOSITORY") as string;
   }
 
-  const output = await exec("git config --get remote.origin.url");
+  const output = await execCapture("git config --get remote.origin.url");
   // output = e.g. git@github.com:myname/myrepo.git
   return output.split(":")[1].replace(".git", "");
 };
