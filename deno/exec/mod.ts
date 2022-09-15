@@ -57,7 +57,7 @@ export const exec = async (
     output: OutputMode.Tee,
     verbose: false,
     cwd: Deno.cwd(),
-    printCommand: true,
+    printCommand: false,
     continueOnError: false,
   }
 ): Promise<IExecResponse> => {
