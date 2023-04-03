@@ -13,15 +13,17 @@ export DENO_SOURCE                 := env_var_or_default("DENO_SOURCE", "https:/
 bold                               := '\033[1m'
 normal                             := '\033[0m'
 
-_help:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    if [ -f /.dockerenv ]; then
-        just --list --unsorted --list-heading $'🌱 Commands:\n\n';
-    else
-        # Hoist into a docker container with all require CLI tools installed
-        deno run --unstable --allow-all {{DENO_SOURCE}}/commands/docker/docker_mount.ts --mount-ssh=true --mount-git-config=true --user=root --image={{DOCKER_IMAGE_PREFIX}}{{DOCKER_IMAGE_NAME}}:{{DOCKER_TAG}} --context="." --dockerfile=Dockerfile --command=bash;
-    fi
+@_help:
+    just --list --unsorted --list-heading $'🌱 Commands:\n\n';
+# _help:
+#     #!/usr/bin/env bash
+#     set -euo pipefail
+#     if [ -f /.dockerenv ]; then
+#         just --list --unsorted --list-heading $'🌱 Commands:\n\n';
+#     else
+#         # Hoist into a docker container with all require CLI tools installed
+#         deno run --unstable --allow-all {{DENO_SOURCE}}/commands/docker/docker_mount.ts --mount-ssh=true --mount-git-config=true --user=root --image={{DOCKER_IMAGE_PREFIX}}{{DOCKER_IMAGE_NAME}}:{{DOCKER_TAG}} --context="." --dockerfile=Dockerfile --command=bash;
+#     fi
 
 # Bump the version and push a git tag (triggers pushing new docker image). inc=major|minor|patch
 @publish inc="patch":
