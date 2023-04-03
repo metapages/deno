@@ -20,7 +20,7 @@ _help:
         just --list --unsorted --list-heading $'🌱 Commands:\n\n';
     else
         # Hoist into a docker container with all require CLI tools installed
-        deno run --unstable --allow-all {{DENO_SOURCE}}/commands/docker/docker_mount.ts --mount-ssh=true --mount-git-config=true  --user=root --image={{DOCKER_IMAGE_PREFIX}}{{DOCKER_IMAGE_NAME}}:{{DOCKER_TAG}} --context="." --dockerfile=Dockerfile --command=bash;
+        deno run --unstable --allow-all {{DENO_SOURCE}}/commands/docker/docker_mount.ts --mount-ssh=true --mount-git-config=true --user=root --image={{DOCKER_IMAGE_PREFIX}}{{DOCKER_IMAGE_NAME}}:{{DOCKER_TAG}} --context="." --dockerfile=Dockerfile --command=bash;
     fi
 
 # Bump the version and push a git tag (triggers pushing new docker image). inc=major|minor|patch

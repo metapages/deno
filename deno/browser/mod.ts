@@ -87,6 +87,7 @@ type BuildWithViteOptions = {
   HOST?: string;
   PORT?: string;
   VERSIONING?: string;
+  DEPLOY_TARGET?: string;
 } & Record<string, string>;
 
 /**
@@ -142,7 +143,8 @@ export const buildWithViteInternal: (
     }
   }
   const env = { ...Deno.env.toObject(), ...args };
-  await exec("./node_modules/vite/bin/vite.js build --mode=production", env);
+
+  await exec("npx vite build --mode=production", env);
 };
 /**
  * Creates ./docs/v/index.html with all the standalone previuos versions
