@@ -53,7 +53,7 @@ if (!existsSync(join(opts.CERTS_DIR, `${certName}-key.pem`))) {
     ensureDirSync(opts.CERTS_DIR);
     Deno.chdir(opts.CERTS_DIR);
     console.log(`mkcert -cert-file ${certName}.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`)
-    response = await exec(`mkcert -cert-file ${certName}.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`, {
+    response = await exec(`mkcert -cert-file ${certName}-cert.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`, {
         output: OutputMode.Capture,
     });
     if (response.status.code !== 0) {
