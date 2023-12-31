@@ -1,5 +1,7 @@
 # Deno scripts for build/test/deploy/misc operations
 
+Location: https://deno.land/x/metapages
+
 This repo stores scripts used for build/test/deploy commands for hundreds of repositories.
 
 ## Overview
