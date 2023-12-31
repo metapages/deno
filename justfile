@@ -17,6 +17,8 @@ grey                               := "\\e[90m"
     echo -e ""
     echo -e "        Github  URL 🔗 {{green}}$(git config --get remote.origin.url | sd ':' '/' | sd 'git@' 'https://' | sd '\.git' ''){{normal}}"
     echo -e "        Publish URL 🔗 {{green}}https://deno.land/x/metapages{{normal}}"
+    echo -e '        Example deno:  {{green}}import { thing } from "https://deno.land/x/metapages@v0.0.20/net/mod.ts"'
+    
     echo -e ""
 
 # Bump the version and push a git tag (triggers pushing new docker image). inc=major|minor|patch
