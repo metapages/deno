@@ -39,7 +39,9 @@ if (isInsideDocker()) {
 //let response = await exec('git ls-remote --tags origin', {output: OutputMode.Capture});
 try {
   let responseMkcertCheck = await run("command -v mkcert");
+  console.log('responseMkcertCheck', responseMkcertCheck);
 } catch (error) {
+  console.error(error);
   console.log(
     "💥 %cmkcert%c💥 is not installed and is required for running the development server with https",
     "font-weight: bold",
