@@ -15,62 +15,79 @@ import {
   existsSync,
 } from 'https://deno.land/std@0.130.0/fs/mod.ts';
 import { join } from 'https://deno.land/std@0.130.0/path/mod.ts';
-import {
-  exec,
-  OutputMode,
-} from 'https://deno.land/x/exec@0.0.5/mod.ts';
+import { run } from 'https://deno.land/x/run_simple@2.3.0/mod.ts';
 
 import { getArgsFromEnvAndCli } from '../env/args_or_env.ts';
 import { isInsideDocker } from './docker/mod.ts';
 
 const opts = getArgsFromEnvAndCli({
-    // The domain name to use for the certificate
-    FQDN: "metaframe1.dev",
-    // The directory to store the certificate in
-    CERTS_DIR: ".certs",
-    // The base name of the certs (defaults to $FQDN)
-    CERT_NAME: false,
-  });
+  // The domain name to use for the certificate
+  FQDN: "metaframe1.dev",
+  // The directory to store the certificate in
+  CERTS_DIR: ".certs",
+  // The base name of the certs (defaults to $FQDN)
+  CERT_NAME: false,
+});
 
 if (isInsideDocker()) {
-    console.log("Inside docker context, assuming mkcert has been run on the host");
-    Deno.exit(0);
+  console.log(
+    "Inside docker context, assuming mkcert has been run on the host"
+  );
+  Deno.exit(0);
 }
 
 //let response = await exec('git ls-remote --tags origin', {output: OutputMode.Capture});
-let response = await exec("command -v mkcert", {
-    output: OutputMode.Capture,
-});
-if (response.status.code !== 0) {
-    console.log("💥 %cmkcert%c💥 is not installed and is required for running the development server with https",  "font-weight: bold", "");
-    console.log("👉 install instructions: https://github.com/FiloSottile/mkcert");
-    Deno.exit(1);
+try {
+  let responseMkcertCheck = await run("command -v mkcert");
+} catch (error) {
+  console.log(
+    "💥 %cmkcert%c💥 is not installed and is required for running the development server with https",
+    "font-weight: bold",
+    ""
+  );
+  console.log("👉 install instructions: https://github.com/FiloSottile/mkcert");
+  Deno.exit(1);
 }
 
 const certName = opts.CERT_NAME || opts.FQDN || "local-cert";
 
 if (!existsSync(join(opts.CERTS_DIR, `${certName}-key.pem`))) {
-    ensureDirSync(opts.CERTS_DIR);
-    Deno.chdir(opts.CERTS_DIR);
-    console.log(`mkcert -cert-file ${certName}.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`)
-    response = await exec(`mkcert -cert-file ${certName}-cert.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`, {
-        output: OutputMode.Capture,
-    });
-    if (response.status.code !== 0) {
-        console.log("💥 %cmkcert failure%c💥",  "font-weight: bold");
-        console.log(`%c${response.output}`,  "color: red");
-        Deno.exit(1);
-    }
-    console.log(`👉 mkcert generated http certificates for ${opts.FQDN} in ${opts.CERTS_DIR}`);
+  ensureDirSync(opts.CERTS_DIR);
+  Deno.chdir(opts.CERTS_DIR);
+  console.log(
+    `mkcert -cert-file ${certName}.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`
+  );
+  try {
+    const mkcertResponse = await run(
+      `mkcert -cert-file ${certName}-cert.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`
+    );
+  } catch (error) {
+    console.log("💥 %cmkcert failure%c💥", "font-weight: bold");
+    console.log(`%c${error}`, "color: red");
+    Deno.exit(1);
+  }
+  console.log(
+    `👉 mkcert generated http certificates for ${opts.FQDN} in ${opts.CERTS_DIR}`
+  );
 }
 
 const etchosts = await Deno.readTextFile("/etc/hosts");
 if (!etchosts.includes(opts.FQDN)) {
-    console.log(`💥 %c/etc/hosts%c does not include %c${opts.FQDN}`, "font-weight: bold", "", "font-weight: bold");
-    console.log(`💥 Add below to /etc/hosts with this command: %csudo vi /etc/hosts 💥`, "font-weight: bold");
-    console.log("");
-    console.log(`%c127.0.0.1       ${opts.FQDN}`, "font-weight: bold");
-    console.log("");
-    Deno.exit(1);
+  console.log(
+    `💥 %c/etc/hosts%c does not include %c${opts.FQDN}`,
+    "font-weight: bold",
+    "",
+    "font-weight: bold"
+  );
+  console.log(
+    `💥 Add below to /etc/hosts with this command: %csudo vi /etc/hosts 💥`,
+    "font-weight: bold"
+  );
+  console.log("");
+  console.log(`%c127.0.0.1       ${opts.FQDN}`, "font-weight: bold");
+  console.log("");
+  Deno.exit(1);
 }
-console.log(`✅ Local mkcert certificates and /etc/hosts contains: 127.0.0.1       ${opts.FQDN}`);
+console.log(
+  `✅ Local mkcert certificates and /etc/hosts contains: 127.0.0.1       ${opts.FQDN}`
+);

@@ -3,9 +3,10 @@
  * independent of the OS.
  * If inside a docker container: print out the full URL instead.
  */
-import { parse } from "https://deno.land/std@0.83.0/flags/mod.ts";
-import * as Colors from "https://deno.land/std@0.83.0/fmt/colors.ts";
-import { isInsideDocker } from "../docker-compose/mod.ts";
+import { parse } from 'https://deno.land/std@0.83.0/flags/mod.ts';
+import * as Colors from 'https://deno.land/std@0.83.0/fmt/colors.ts';
+
+import { isInsideDocker } from '../docker-compose/mod.ts';
 
 let url: string = parse(Deno.args)['_'][0] as string;
 
@@ -22,9 +23,9 @@ if (isInsideDocker()) {
 }
 
 if (Deno.build.os === 'linux') {
-    const process = await Deno.run({ cmd: ['xdg-open', url] });
+    const process = Deno.run({ cmd: ['xdg-open', url] });
     const status = await process.status();
 } else if (Deno.build.os === 'darwin') {
-    const process = await Deno.run({ cmd: ['open', url] });
+    const process = Deno.run({ cmd: ['open', url] });
     const status = await process.status();
 }
