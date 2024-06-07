@@ -38,7 +38,7 @@ if (isInsideDocker()) {
 
 //let response = await exec('git ls-remote --tags origin', {output: OutputMode.Capture});
 try {
-  let responseMkcertCheck = await run("command -v mkcert");
+  let responseMkcertCheck = await run("which mkcert");
   console.log('responseMkcertCheck', responseMkcertCheck);
 } catch (error) {
     console.log("Failed!!!!!")
