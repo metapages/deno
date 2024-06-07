@@ -38,10 +38,8 @@ if (isInsideDocker()) {
 
 //let response = await exec('git ls-remote --tags origin', {output: OutputMode.Capture});
 try {
-  let responseMkcertCheck = await run("which mkcert");
-  console.log('responseMkcertCheck', responseMkcertCheck);
+  await run("which mkcert");
 } catch (error) {
-    console.log("Failed!!!!!")
   console.error(error);
   console.log(
     "💥 %cmkcert%c💥 is not installed and is required for running the development server with https",
@@ -61,7 +59,7 @@ if (!existsSync(join(opts.CERTS_DIR, `${certName}-key.pem`))) {
     `mkcert -cert-file ${certName}.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`
   );
   try {
-    const mkcertResponse = await run(
+    await run(
       `mkcert -cert-file ${certName}-cert.pem -key-file ${certName}-key.pem ${opts.FQDN} localhost`
     );
   } catch (error) {
